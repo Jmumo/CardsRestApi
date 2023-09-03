@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -151,7 +152,11 @@ public class CardService implements CardsRestApi.Services.CardService {
         }
 
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sortdirection,sort));
-        return cardRepository.findAll(cardSpecification,pageable);
+        List<Card> cardList = cardRepository.findAll(cardSpecification,pageable);
+
+        User user = userRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName()).get();
+
+        return cardList.stream().filter(card->(card.getUser().equals(user))).collect(Collectors.toList());
     }
 
     private String validateColor(String color) {
